@@ -1,7 +1,7 @@
 .sidebar {
   width: 8vw; 
   height: 100vh;
-  background-color: #0070f3;
+  background-color: #2265C9;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -40,8 +40,9 @@
   align-items: center;
   justify-content: center;
   width: 100%;
-  padding: 1vh 0; /* Adjust padding to be 1% of the viewport height */
+  padding: 1vh 0;
   transition: background-color 0.3s ease;
+  border-radius: 40px 0 0 40px;
 }
 
 .navLink span {
@@ -51,11 +52,13 @@
 .navLink:hover {
   background-color: white;
   color: white;
+  border-radius: 40px 0 0 40px;
+  width: 100%;
 }
 
 .profile {
   margin-top: auto;
-  margin-bottom: 2vh; /* Adjust margin to be 2% of the viewport height */
+  margin-bottom: 2vh;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -64,8 +67,8 @@
 }
 
 .profile img {
-  width: 3vw; /* Adjust width to be 4% of the viewport width */
+  width: 3vw;
   height: auto;
   border-radius: 50%;
-  margin-bottom: 1vh; /* Adjust margin to be 1% of the viewport height */
+  margin-bottom: 1vh; 
 }

@@ -1,8 +1,14 @@
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
-## Getting Started
+## 프로젝트 실행 방법
 
-First, run the development server:
+우선, 설치 패키지를 로컬에서 설치해주기 위해 다음 명령어를 실행시켜줍니다.
+
+```bash
+npm install
+```
+
+run the development server:
 
 ```bash
 npm run dev

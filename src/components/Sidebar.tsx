@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import styles from '../css/Sidebar.module.css';
 import logoIcon from '../icon/logo.png';
@@ -29,6 +30,11 @@ const navItems = [
 
 const Sidebar: React.FC = () => {
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
+  const router = useRouter();
+
+  const handleNavigation = (path: string) => {
+    router.push(`/${path}`);
+  };
 
   return (
     <div className={styles.sidebar}>
@@ -43,8 +49,9 @@ const Sidebar: React.FC = () => {
               className={`${styles.navItem} ${hoveredItem === item.name ? styles.hovered : ''}`}
               onMouseEnter={() => setHoveredItem(item.name)}
               onMouseLeave={() => setHoveredItem(null)}
+              onClick={() => handleNavigation(item.name)}
             >
-              <a href={item.name} className={styles.navLink}>
+              <a className={styles.navLink}>
                 <Image
                   src={hoveredItem === item.name ? item.iconSelected : item.icon}
                   alt={item.alt}

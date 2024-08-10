@@ -1,8 +1,101 @@
-.container {
-  display: flex;
+.replyTextarea {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  resize: vertical;
 }
 
-.main {
+.submitButton {
+  background-color: #2265C9;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.submitButton:hover {
+  background-color: #1a4fa0;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.pageButton {
+  background-color: #2265C9;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  margin: 0 5px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.pageButton:hover {
+  background-color: #1a4fa0;
+}
+
+.pageButton:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.pageInfo {
+  margin: 0 10px;
+  font-weight: bold;
+  color: #2265C9;
+}
+
+.pageContainer {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f5f5f5;
+}
+
+.contentWrapper {
   flex-grow: 1;
   padding: 20px;
+  margin-left: 120px; /* 사이드바 너비에 맞춰 조정 */
+}
+
+.mainContent {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  padding: 20px;
+}
+
+.title {
+  color: #2265C9;
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+.tableContainer {
+  overflow-x: auto;
+}
+
+.feedbackTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.feedbackTable th,
+.feedbackTable td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.feedbackTable th {
+  background-color: #2265C9;
+  color: white;
+  font-weight: 600;
 }

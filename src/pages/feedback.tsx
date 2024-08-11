@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import styles from '../css/Index.module.css';
 import feedbackStyles from '../css/Feedback.module.css';
 import Sidebar from '../components/Sidebar';
@@ -49,15 +49,8 @@ const FeedbackAndFaq: React.FC = () => {
     const [editFaq, setEditFaq] = useState<GetFaqResponse | null>(null);
     const [replyFilter, setReplyFilter] = useState<boolean | null>(null);
 
-    useEffect(() => {
-        if (activeTab === 'feedback') {
-            fetchFeedbacks(currentPage);
-        } else if (activeTab === 'faq') {
-            fetchFaqs();
-        }
-    }, [currentPage, activeTab, replyFilter]);
-
-    const fetchFeedbacks = async (page: number) => {
+    // fetchFeedbacks 함수의 메모이제이션을 위해 useCallback 사용
+    const fetchFeedbacks = useCallback(async (page: number) => {
         try {
             const url = `/api/v1/feedbacks/admin`;
             const params: any = {
@@ -66,7 +59,7 @@ const FeedbackAndFaq: React.FC = () => {
             };
 
             if (replyFilter !== null) {
-                params.reply = replyFilter;
+                params.hasReply = replyFilter;
             }
 
             const response = await apiClient.get<ApiResult<FeedbackPageResponse>>(url, { params });
@@ -97,7 +90,15 @@ const FeedbackAndFaq: React.FC = () => {
                 console.error('Unexpected error:', error);
             }
         }
-    };
+    }, [replyFilter]);
+
+    useEffect(() => {
+        if (activeTab === 'feedback') {
+            fetchFeedbacks(currentPage);
+        } else if (activeTab === 'faq') {
+            fetchFaqs();
+        }
+    }, [currentPage, activeTab, replyFilter, fetchFeedbacks]);
 
     const fetchFaqs = async () => {
         try {

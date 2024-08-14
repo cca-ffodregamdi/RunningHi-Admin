@@ -4,8 +4,9 @@ import React, { useState, useEffect, useCallback } from 'react';
 import styles from '../css/Index.module.css';
 import feedbackStyles from '../css/Feedback.module.css';
 import Sidebar from '../components/Sidebar';
-import apiClient from '../lib/axios';
-import axios from "axios";
+import appClient from '@/lib/appClient';
+import FaqList from '../components/FaqList';
+import Pagination from "@/components/Pagination";
 
 interface ApiResult<T> {
     timeStamp: string;
@@ -48,22 +49,23 @@ const FeedbackAndFaq: React.FC = () => {
     const [newFaq, setNewFaq] = useState<GetFaqResponse>({ faqNo: 0, question: '', answer: '' });
     const [editFaq, setEditFaq] = useState<GetFaqResponse | null>(null);
     const [replyFilter, setReplyFilter] = useState<boolean | null>(null);
+    const [editReply, setEditReply] = useState<{ [key: number]: boolean }>({}); // New state for edit mode
 
-    // fetchFeedbacks 함수의 메모이제이션을 위해 useCallback 사용
     const fetchFeedbacks = useCallback(async (page: number) => {
         try {
             const url = `/api/v1/feedbacks/admin`;
-            const params: any = {
-                page: page,
-                size: 10,
-            };
+            const params = new URLSearchParams({
+                page: page.toString(),
+                size: '10',
+            });
 
             if (replyFilter !== null) {
-                params.hasReply = replyFilter;
+                params.append('hasReply', replyFilter.toString());
             }
 
-            const response = await apiClient.get<ApiResult<FeedbackPageResponse>>(url, { params });
-            const feedbackData = response.data?.data;
+            const response = await appClient(`${url}?${params.toString()}`, { method: 'GET' });
+            const data: ApiResult<FeedbackPageResponse> = await response.json();
+            const feedbackData = data.data;
             if (feedbackData) {
                 setFeedbacks(feedbackData.content ?? []);
                 setTotalPages(feedbackData.totalPages ?? 1);
@@ -80,15 +82,6 @@ const FeedbackAndFaq: React.FC = () => {
             }
         } catch (error) {
             console.error('피드백 가져오기 에러:', error);
-            if (axios.isAxiosError(error)) {
-                console.error('Axios error details:', {
-                    message: error.message,
-                    code: error.code,
-                    response: error.response?.data,
-                });
-            } else {
-                console.error('Unexpected error:', error);
-            }
         }
     }, [replyFilter]);
 
@@ -103,8 +96,9 @@ const FeedbackAndFaq: React.FC = () => {
     const fetchFaqs = async () => {
         try {
             const url = `/api/v1/faq`;
-            const response = await apiClient.get<ApiResult<GetFaqResponse[]>>(url);
-            const faqData = response.data?.data;
+            const response = await appClient(url, { method: 'GET' });
+            const data: ApiResult<GetFaqResponse[]> = await response.json();
+            const faqData = data.data;
             if (faqData) {
                 setFaqs(faqData ?? []);
             } else {
@@ -112,22 +106,16 @@ const FeedbackAndFaq: React.FC = () => {
             }
         } catch (error) {
             console.error('FAQ 가져오기 에러:', error);
-            if (axios.isAxiosError(error)) {
-                console.error('Axios error details:', {
-                    message: error.message,
-                    code: error.code,
-                    response: error.response?.data,
-                });
-            } else {
-                console.error('Unexpected error:', error);
-            }
         }
     };
 
     const addFaq = async () => {
         try {
-            const response = await apiClient.post('/api/v1/faq', newFaq);
-            if (response.status === 201) {
+            const response = await appClient('/api/v1/faq', {
+                method: 'POST',
+                body: JSON.stringify(newFaq),
+            });
+            if (response.ok) {
                 setNewFaq({ faqNo: 0, question: '', answer: '' });
                 fetchFaqs();
             }
@@ -136,11 +124,13 @@ const FeedbackAndFaq: React.FC = () => {
         }
     };
 
-    const updateFaq = async (faqNo: number) => {
+    const updateFaq = async (faq: GetFaqResponse) => {
         try {
-            if (editFaq) {
-                await apiClient.put(`/api/v1/faq/${faqNo}`, editFaq);
-                setEditFaq(null);
+            const response = await appClient(`/api/v1/faq/${faq.faqNo}`, {
+                method: 'PUT',
+                body: JSON.stringify(faq),
+            });
+            if (response.ok) {
                 fetchFaqs();
             }
         } catch (error) {
@@ -150,24 +140,32 @@ const FeedbackAndFaq: React.FC = () => {
 
     const deleteFaq = async (faqNo: number) => {
         try {
-            await apiClient.delete(`/api/v1/faq/${faqNo}`);
-            fetchFaqs();
+            const response = await appClient(`/api/v1/faq/${faqNo}`, { method: 'DELETE' });
+            if (response.ok) {
+                fetchFaqs();
+            }
         } catch (error) {
             console.error('FAQ 삭제 에러:', error);
         }
     };
 
-    const handleReplyChange = (feedbackNo: number, content: string) => {
-        setReplyContent(prev => ({ ...prev, [feedbackNo]: content }));
-    };
-
     const submitReply = async (feedbackNo: number) => {
         try {
-            await apiClient.put(`/api/v1/feedbacks/admin/${feedbackNo}`, { content: replyContent[feedbackNo] });
-            fetchFeedbacks(currentPage);
+            const response = await appClient(`/api/v1/feedbacks/admin/${feedbackNo}`, {
+                method: 'PUT',
+                body: JSON.stringify({ content: replyContent[feedbackNo] }),
+            });
+            if (response.ok) {
+                fetchFeedbacks(currentPage);
+                setEditReply(prev => ({ ...prev, [feedbackNo]: false })); // Exit edit mode
+            }
         } catch (error) {
             console.error('답변 제출 에러:', error);
         }
+    };
+
+    const handleReplyChange = (feedbackNo: number, content: string) => {
+        setReplyContent(prev => ({ ...prev, [feedbackNo]: content }));
     };
 
     const handleTabChange = (tab: string) => {
@@ -187,6 +185,10 @@ const FeedbackAndFaq: React.FC = () => {
     const handleFilterChange = (filter: boolean | null) => {
         setReplyFilter(filter);
         setCurrentPage(1);
+    };
+
+    const toggleEditReply = (feedbackNo: number) => {
+        setEditReply(prev => ({ ...prev, [feedbackNo]: !(prev[feedbackNo] ?? false) }));
     };
 
     return (
@@ -254,23 +256,55 @@ const FeedbackAndFaq: React.FC = () => {
                                             <td className={feedbackStyles.titleColumn}>{feedback.title}</td>
                                             <td className={feedbackStyles.contentColumn}>{feedback.content}</td>
                                             <td className={feedbackStyles.categoryColumn}>{feedback.category}</td>
-                                            <td className={feedbackStyles.dateColumn}>{new Date(feedback.createDate).toLocaleString()}</td>
-                                            <td className={feedbackStyles.dateColumn}>{new Date(feedback.updateDate).toLocaleString()}</td>
+                                            <td className={feedbackStyles.dateColumn}>{new Date(feedback.createDate).toLocaleDateString()}</td>
+                                            <td className={feedbackStyles.dateColumn}>{new Date(feedback.updateDate).toLocaleDateString()}</td>
                                             <td className={feedbackStyles.nicknameColumn}>{feedback.nickname}</td>
                                             <td className={feedbackStyles.replyColumn}>
-                                            <textarea
-                                                className={feedbackStyles.replyTextarea}
-                                                value={replyContent[feedback.feedbackNo] || ''}
-                                                onChange={(e) => handleReplyChange(feedback.feedbackNo, e.target.value)}
-                                            />
+                                                {editReply[feedback.feedbackNo] ? (
+                                                    <textarea
+                                                        value={replyContent[feedback.feedbackNo] || ''}
+                                                        onChange={e => handleReplyChange(feedback.feedbackNo, e.target.value)}
+                                                        placeholder="답변 입력"
+                                                        className={feedbackStyles.replyTextarea}
+                                                    />
+                                                ) : (
+                                                    feedback.hasReply ? (
+                                                        <span>{feedback.reply}</span>
+                                                    ) : (
+                                                        <textarea
+                                                            value={replyContent[feedback.feedbackNo] || ''}
+                                                            onChange={e => handleReplyChange(feedback.feedbackNo, e.target.value)}
+                                                            placeholder="답변 입력"
+                                                            className={feedbackStyles.replyTextarea}
+                                                        />
+                                                    )
+                                                )}
                                             </td>
                                             <td className={feedbackStyles.actionColumn}>
-                                                <button
-                                                    className={styles.submitButton}
-                                                    onClick={() => submitReply(feedback.feedbackNo)}
-                                                >
-                                                    {feedback.hasReply ? '답변 수정' : '답변 제출'}
-                                                </button>
+                                                {!feedback.hasReply && (
+                                                    <button
+                                                        onClick={() => toggleEditReply(feedback.feedbackNo)}
+                                                        className={feedbackStyles.saveButton}
+                                                    >
+                                                        제출
+                                                    </button>
+                                                )}
+                                                {editReply[feedback.feedbackNo] && (
+                                                    <button
+                                                        onClick={() => submitReply(feedback.feedbackNo)}
+                                                        className={feedbackStyles.saveButton}
+                                                    >
+                                                        제출
+                                                    </button>
+                                                )}
+                                                {feedback.hasReply && !editReply[feedback.feedbackNo] && (
+                                                    <button
+                                                        onClick={() => toggleEditReply(feedback.feedbackNo)}
+                                                        className={feedbackStyles.editButton}
+                                                    >
+                                                        수정
+                                                    </button>
+                                                )}
                                             </td>
                                         </tr>
                                     ))
@@ -281,85 +315,22 @@ const FeedbackAndFaq: React.FC = () => {
                                 )}
                                 </tbody>
                             </table>
-                            <div className={styles.pagination}>
-                                <button className={styles.pageButton}
-                                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                                        disabled={currentPage === 1}>
-                                    이전
-                                </button>
-                                <span className={styles.pageInfo}>{currentPage} / {totalPages}</span>
-                                <button className={styles.pageButton}
-                                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                                        disabled={currentPage === totalPages}>
-                                    다음
-                                </button>
-                            </div>
+                            <Pagination
+                                currentPage={currentPage}
+                                totalPages={totalPages}
+                                setCurrentPage={setCurrentPage}
+                            />
                         </div>
                     )}
 
                     {activeTab === 'faq' && (
                         <div className={feedbackStyles.tableContainer}>
-                            <table className={feedbackStyles.feedbackTable}>
-                                <thead>
-                                <tr>
-                                    <th className={feedbackStyles.numberColumnFaq}>번호</th>
-                                    <th className={feedbackStyles.contentColumnFaq}>질문</th>
-                                    <th className={feedbackStyles.contentColumnFaq}>답변</th>
-                                    <th className={feedbackStyles.actionColumnFaq}>작업</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                {faqs.length > 0 ? (
-                                    faqs.map(faq => (
-                                        <tr key={faq.faqNo}>
-                                            <td>{faq.faqNo}</td>
-                                            <td>
-                                                {editFaq && editFaq.faqNo === faq.faqNo ? (
-                                                    <div className={feedbackStyles.editFieldContainer}>
-                                                        <input
-                                                            type="text"
-                                                            name="question"
-                                                            value={editFaq.question}
-                                                            onChange={handleFaqInputChange}
-                                                            className={feedbackStyles.editInputField}
-                                                        />
-                                                    </div>
-                                                ) : (
-                                                    faq.question
-                                                )}
-                                            </td>
-                                            <td>
-                                                {editFaq && editFaq.faqNo === faq.faqNo ? (
-                                                    <div className={feedbackStyles.editFieldContainer}>
-                                                        <textarea
-                                                            name="answer"
-                                                            value={editFaq.answer}
-                                                            onChange={handleFaqInputChange}
-                                                            className={feedbackStyles.editTextareaField}
-                                                        />
-                                                    </div>
-                                                ) : (
-                                                    faq.answer
-                                                )}
-                                            </td>
-                                            <td>
-                                                {editFaq && editFaq.faqNo === faq.faqNo ? (
-                                                    <button onClick={() => updateFaq(faq.faqNo)} className={feedbackStyles.saveButton}>저장</button>
-                                                ) : (
-                                                    <button onClick={() => setEditFaq(faq)} className={feedbackStyles.editButton}>수정</button>
-                                                )}
-                                                <button onClick={() => deleteFaq(faq.faqNo)} className={feedbackStyles.deleteButton}>삭제</button>
-                                            </td>
-                                        </tr>
-                                    ))
-                                ) : (
-                                    <tr>
-                                        <td colSpan={4}>FAQ가 없습니다.</td>
-                                    </tr>
-                                )}
-                                </tbody>
-                            </table>
-
+                            <FaqList
+                                faqs={faqs}
+                                onEdit={(faq) => setEditFaq(faq)}
+                                onDelete={deleteFaq}
+                                onSave={updateFaq}
+                            />
                             <div className={feedbackStyles.faqForm}>
                                 <h3 className={feedbackStyles.formTitle}>FAQ 추가</h3>
                                 <input
@@ -377,7 +348,12 @@ const FeedbackAndFaq: React.FC = () => {
                                     onChange={handleFaqInputChange}
                                     className={feedbackStyles.textareaField}
                                 />
-                                <button onClick={addFaq} className={feedbackStyles.addButton}>FAQ 추가</button>
+                                <button
+                                    onClick={addFaq}
+                                    className={feedbackStyles.addButton}
+                                >
+                                    FAQ 추가
+                                </button>
                             </div>
                         </div>
                     )}

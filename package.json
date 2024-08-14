@@ -13,6 +13,7 @@
     "axios": "^1.7.3",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
+    "crypto-js": "^4.2.0",
     "http-proxy-middleware": "^3.0.0",
     "lucide-react": "^0.417.0",
     "mysql2": "^3.11.0",
@@ -30,6 +31,7 @@
     "zustand": "^4.5.0"
   },
   "devDependencies": {
+    "@types/crypto-js": "^4.2.2",
     "@types/mysql": "^2.15.26",
     "@types/node": "^20",
     "@types/react": "^18",

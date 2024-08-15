@@ -23,6 +23,12 @@
     margin-bottom: 20px;
 }
 
+.buttonContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
 
 .button,
 .buttonPrimary,
@@ -230,8 +236,7 @@
 }
 
 .editButton, .deleteButton, .saveButton, .addButton {
-    padding: 8px 16px;
-    margin-right: 8px;
+    padding: 4px 12px;
     border: none;
     border-radius: 4px;
     cursor: pointer;

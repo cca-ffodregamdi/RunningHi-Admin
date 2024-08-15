@@ -61,6 +61,7 @@ const FaqList: React.FC<FaqListProps> = ({ faqs, onEdit, onDelete, onSave }) => 
                                     value={editableFaq?.question || ''}
                                     onChange={handleInputChange}
                                     className={feedbackStyles.editInput}
+                                    size={70}
                                 />
                             ) : (
                                 faq.question
@@ -73,6 +74,8 @@ const FaqList: React.FC<FaqListProps> = ({ faqs, onEdit, onDelete, onSave }) => 
                                     value={editableFaq?.answer || ''}
                                     onChange={handleInputChange}
                                     className={feedbackStyles.editTextarea}
+                                    cols={70}
+                                    rows={5}
                                 />
                             ) : (
                                 faq.answer
@@ -81,13 +84,17 @@ const FaqList: React.FC<FaqListProps> = ({ faqs, onEdit, onDelete, onSave }) => 
                         <td>
                             {editFaqNo === faq.faqNo ? (
                                 <>
-                                    <button onClick={handleSaveClick} className={feedbackStyles.saveButton}>저장</button>
-                                    <button onClick={() => setEditFaqNo(null)} className={feedbackStyles.deleteButton}>취소</button>
+                                    <div className={feedbackStyles.buttonContainer}>
+                                        <button onClick={handleSaveClick} className={feedbackStyles.saveButton}>저장</button>
+                                        <button onClick={() => setEditFaqNo(null)} className={feedbackStyles.deleteButton}>취소</button>
+                                    </div>
                                 </>
                             ) : (
                                 <>
-                                    <button onClick={() => handleEditClick(faq)} className={feedbackStyles.editButton}>수정</button>
-                                    <button onClick={() => onDelete(faq.faqNo)} className={feedbackStyles.deleteButton}>삭제</button>
+                                    <div className={feedbackStyles.buttonContainer}>
+                                        <button onClick={() => handleEditClick(faq)} className={feedbackStyles.editButton}>수정</button>
+                                        <button onClick={() => onDelete(faq.faqNo)} className={feedbackStyles.deleteButton}>삭제</button>
+                                    </div>
                                 </>
                             )}
                         </td>

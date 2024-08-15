@@ -116,8 +116,8 @@
 
 .logoutButton {
   width: 100%;
-  padding: 10px;
-  margin-bottom: 5px;
+  padding-top: 10px;
+  padding-bottom: 20px;
   background-color: #ff0000;
   color: #ffffff;
   border: none;

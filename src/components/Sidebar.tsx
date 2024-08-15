@@ -17,6 +17,8 @@ import notificationIcon from '../icon/notification.png';
 import notificationIconSelected from '../icon/notification-select.png';
 import announcementIcon from '../icon/announcement.png';
 import announcementIconSelected from '../icon/announcement-select.png';
+import memberIcon from '../icon/member.png'
+import memberIconSelected from '../icon/member-select.png'
 import profileIcon from '../icon/profile.png';
 
 const navItems = [
@@ -26,6 +28,7 @@ const navItems = [
     { name: 'challenge', icon: challengeIcon, iconSelected: challengeIconSelected, alt: '챌린지', width: 30, height: 45 },
     { name: 'notification', icon: notificationIcon, iconSelected: notificationIconSelected, alt: '알림', width: 28, height: 45 },
     { name: 'announcement', icon: announcementIcon, iconSelected: announcementIconSelected, alt: '공지사항', width: 40, height: 40 },
+    { name: 'member', icon: memberIcon, iconSelected: memberIconSelected, alt: '회원', width: 30, height: 45 },
 ];
 
 const Sidebar: React.FC = () => {
@@ -42,10 +45,17 @@ const Sidebar: React.FC = () => {
         router.push(`/${path}`);
     };
 
+    const handleLogout = () => {
+        // Clear all tokens from localStorage
+        localStorage.clear();
+        // Redirect to login page or home page
+        router.push('/auth');
+    };
+
     return (
         <div className={styles.sidebar}>
             <div className={styles.logo}>
-                <Image src={logoIcon} alt="Logo" width={60} height={60} />
+                <Image src={logoIcon} alt="Logo" width={60} height={60}/>
             </div>
             <nav className={styles.nav}>
                 <ul className={styles.navList}>
@@ -70,9 +80,14 @@ const Sidebar: React.FC = () => {
                     ))}
                 </ul>
             </nav>
-            <div className={styles.profile}>
-                <Image src={profileIcon} alt="Profile" width={30} height={30} />
+            <div className={styles.adminInfo}>
+                <Image src={profileIcon} alt="Admin Profile" width={40} height={40}/>
                 <span>M_이효진</span>
+            </div>
+            <div className={styles.logoutContainer}>
+                <button className={styles.logoutButton} onClick={handleLogout}>
+                    로그아웃
+                </button>
             </div>
         </div>
     );

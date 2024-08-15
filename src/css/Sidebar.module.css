@@ -1,9 +1,8 @@
 .sidebar {
-  width: 5vw;
-  height: 100vh;
-  background-color: #2265C9;
   display: flex;
   flex-direction: column;
+  height: 100vh;
+  background-color: #2265C9;
   align-items: center;
   padding-top: 2vh;
   position: fixed;
@@ -94,4 +93,37 @@
 
 .navLink:focus {
   outline: none;
+}
+
+.adminInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px;
+  margin-top: auto;
+}
+
+.adminInfo span {
+  margin-top: 5px;
+  color: #ffffff;
+  text-align: center;
+}
+
+.logoutContainer {
+  padding: 10px;
+  width: 100%;
+}
+
+.logoutButton {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 5px;
+  background-color: #ff0000;
+  color: #ffffff;
+  border: none;
+  cursor: pointer;
+}
+
+.logoutButton:hover {
+  background-color: #cc0000;
 }

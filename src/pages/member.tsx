@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { FaSearch, FaBan, FaCheck } from 'react-icons/fa'; // Import icons
+import styles from '../css/Index.module.css'; // Importing the index.module.css
 import memberStyles from '../css/Member.module.css';
-import styles from '../css/Index.module.css';
 import Sidebar from '../components/Sidebar';
 import Pagination from '../components/Pagination';
-import appClient from "@/lib/appClient";
+import appClient from '@/lib/appClient';
 
 interface Member {
     id: string;
@@ -19,33 +19,40 @@ interface Member {
 }
 
 const Member: React.FC = () => {
-    const [activeTab, setActiveTab] = useState('all');
     const [members, setMembers] = useState<Member[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
     const [searchQuery, setSearchQuery] = useState('');
+    const [blacklistFilter, setBlacklistFilter] = useState<boolean | null>(null); // State for blacklist filter
     const membersPerPage = 10;
 
-    useEffect(() => {
-        const fetchMembers = async () => {
-            try {
-                const response = await appClient('/api/members', {
-                    method: 'GET',
-                });
-                const data = await response.json();
-                if (Array.isArray(data)) {
-                    setMembers(data);
-                } else {
-                    console.error('Expected an array of members, but received:', data);
-                    setMembers([]);
-                }
-            } catch (error) {
-                console.error('Error fetching members:', error);
+    const fetchMembers = useCallback(async (page: number) => {
+        try {
+            const url = `/api/v1/members`;
+            const params = new URLSearchParams({
+                page: page.toString(),
+                size: membersPerPage.toString(),
+            });
+
+            const response = await appClient(`${url}?${params.toString()}`, { method: 'GET' });
+            const data = await response.json();
+            if (Array.isArray(data.content)) {
+                setMembers(data.content);
+                setTotalPages(data.totalPages);
+                setCurrentPage(data.currentPage);
+            } else {
+                console.error('Expected an array of members, but received:', data);
                 setMembers([]);
             }
-        };
+        } catch (error) {
+            console.error('회원 가져오기 에러:', error);
+            setMembers([]);
+        }
+    }, [membersPerPage]);
 
-        fetchMembers();
-    }, []);
+    useEffect(() => {
+        fetchMembers(currentPage);
+    }, [currentPage, fetchMembers]);
 
     const toggleBlacklist = async (memberId: string) => {
         setMembers(members.map(member =>
@@ -54,7 +61,7 @@ const Member: React.FC = () => {
                 : member
         ));
 
-        await appClient(`/api/members/${memberId}/blacklist`, {
+        await appClient(`/api/v1/members/${memberId}/blacklist`, {
             method: 'POST',
             body: JSON.stringify({ isBlacklisted: !members.find(m => m.id === memberId)?.isBlacklisted }),
             headers: { 'Content-Type': 'application/json' }
@@ -63,12 +70,16 @@ const Member: React.FC = () => {
 
     const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        // 여기에 검색 로직 추가. 현재는 필터링만 수행합니다.
         setCurrentPage(1); // 검색 시 첫 페이지로 이동
     };
 
+    const handleFilterChange = (filter: boolean | null) => {
+        setBlacklistFilter(filter);
+        setCurrentPage(1);
+    };
+
     const filteredMembers = members.filter(member =>
-        (activeTab === 'all' || (activeTab === 'blacklist' && member.isBlacklisted)) &&
+        (blacklistFilter === null || member.isBlacklisted === blacklistFilter) &&
         (member.nickname.toLowerCase().includes(searchQuery.toLowerCase()) ||
             member.name.toLowerCase().includes(searchQuery.toLowerCase()))
     );
@@ -76,87 +87,101 @@ const Member: React.FC = () => {
     const indexOfLastMember = currentPage * membersPerPage;
     const indexOfFirstMember = indexOfLastMember - membersPerPage;
     const currentMembers = filteredMembers.slice(indexOfFirstMember, indexOfLastMember);
-    const totalPages = Math.ceil(filteredMembers.length / membersPerPage);
+    const totalFilteredPages = Math.ceil(filteredMembers.length / membersPerPage);
 
     return (
-        <div className={memberStyles.container}>
+        <div className={styles.pageContainer}>
             <Sidebar />
-            <div className={memberStyles.main}>
-                <h1 className={memberStyles.title}>회원 관리</h1>
-                <div className={styles.tabContainer}>
-                    <button
-                        className={`${styles.tabButton} ${activeTab === 'all' ? styles.activeTab : ''}`}
-                        onClick={() => setActiveTab('all')}
-                    >
-                        전체 회원
-                    </button>
-                    <button
-                        className={`${styles.tabButton} ${activeTab === 'blacklist' ? styles.activeTab : ''}`}
-                        onClick={() => setActiveTab('blacklist')}
-                    >
-                        블랙리스트
-                    </button>
-                </div>
-                <form onSubmit={handleSearch} className={memberStyles.searchContainer}>
-                    <input
-                        type="text"
-                        className={memberStyles.searchInput}
-                        placeholder="닉네임 또는 이름으로 검색"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                    />
-                    <button type="submit" className={memberStyles.searchIcon}>
-                        <FaSearch />
-                    </button>
-                </form>
-                <div className={styles.tableContainer}>
-                    <table className={memberStyles.memberTable}>
-                        <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>닉네임</th>
-                            <th>레벨</th>
-                            <th>이름</th>
-                            <th>신고 횟수</th>
-                            <th>상태</th>
-                            <th>블랙리스트</th>
-                            <th>작업</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {currentMembers.map(member => (
-                            <tr key={member.id}>
-                                <td>{member.id}</td>
-                                <td>{member.nickname}</td>
-                                <td>{member.level}</td>
-                                <td>{member.name}</td>
-                                <td>{member.reportCnt}</td>
-                                <td>{member.isActive ? '활성' : '비활성'}</td>
-                                <td>
-                                    {member.isBlacklisted ? (
-                                        <FaBan className={memberStyles.iconDanger} />
-                                    ) : (
-                                        <FaCheck className={memberStyles.iconSuccess} />
-                                    )}
-                                </td>
-                                <td>
-                                    <button
-                                        className={member.isBlacklisted ? memberStyles.buttonDanger : memberStyles.button}
-                                        onClick={() => toggleBlacklist(member.id)}
-                                    >
-                                        {member.isBlacklisted ? '블랙리스트 해제' : '블랙리스트 등록'}
-                                    </button>
-                                </td>
+            <div className={styles.contentWrapper}>
+                <div className={styles.mainContent}>
+                    <h1 className={styles.title}>회원 관리</h1>
+                    <div className={styles.tabContainer}>
+                        <button
+                            className={`${styles.tabButton} ${blacklistFilter === null ? styles.activeTab : ''}`}
+                            onClick={() => handleFilterChange(null)}
+                        >
+                            전체 회원
+                        </button>
+                        <button
+                            className={`${styles.tabButton} ${blacklistFilter === false ? styles.activeTab : ''}`}
+                            onClick={() => handleFilterChange(false)}
+                        >
+                            일반 회원
+                        </button>
+                        <button
+                            className={`${styles.tabButton} ${blacklistFilter === true ? styles.activeTab : ''}`}
+                            onClick={() => handleFilterChange(true)}
+                        >
+                            블랙리스트 회원
+                        </button>
+                    </div>
+                    <form onSubmit={handleSearch} className={memberStyles.searchContainer}>
+                        <input
+                            type="text"
+                            className={memberStyles.searchInput}
+                            placeholder="닉네임 또는 이름으로 검색"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                        <button type="submit" className={memberStyles.searchIcon}>
+                            <FaSearch />
+                        </button>
+                    </form>
+                    <div className={styles.tableContainer}>
+                        <table className={memberStyles.memberTable}>
+                            <thead>
+                            <tr>
+                                <th className={memberStyles.numberColumn}>ID</th>
+                                <th className={memberStyles.nicknameColumn}>닉네임</th>
+                                <th className={memberStyles.levelColumn}>레벨</th>
+                                <th className={memberStyles.nameColumn}>이름</th>
+                                <th className={memberStyles.reportColumn}>신고 횟수</th>
+                                <th className={memberStyles.statusColumn}>상태</th>
+                                <th className={memberStyles.blacklistColumn}>블랙리스트</th>
+                                <th className={memberStyles.actionColumn}>작업</th>
                             </tr>
-                        ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                            {currentMembers.length > 0 ? (
+                                currentMembers.map(member => (
+                                    <tr key={member.id}>
+                                        <td>{member.id}</td>
+                                        <td>{member.nickname}</td>
+                                        <td>{member.level}</td>
+                                        <td>{member.name}</td>
+                                        <td>{member.reportCnt}</td>
+                                        <td>{member.isActive ? '활성' : '비활성'}</td>
+                                        <td>
+                                            {member.isBlacklisted ? (
+                                                <FaBan className={memberStyles.iconDanger} />
+                                            ) : (
+                                                <FaCheck className={memberStyles.iconSuccess} />
+                                            )}
+                                        </td>
+                                        <td>
+                                            <button
+                                                className={member.isBlacklisted ? memberStyles.buttonDanger : memberStyles.button}
+                                                onClick={() => toggleBlacklist(member.id)}
+                                            >
+                                                {member.isBlacklisted ? '블랙리스트 해제' : '블랙리스트 등록'}
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan={8}>해당 조건의 회원이 없습니다.</td>
+                                </tr>
+                            )}
+                            </tbody>
+                        </table>
+                    </div>
+                    <Pagination
+                        currentPage={currentPage}
+                        totalPages={totalFilteredPages}
+                        setCurrentPage={setCurrentPage}
+                    />
                 </div>
-                <Pagination
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    setCurrentPage={setCurrentPage}
-                />
             </div>
         </div>
     );

@@ -82,10 +82,10 @@
 }
 
 .memberTable .idColumn { width: 10%; }
-.memberTable .nameColumn { width: 20%; }
+.memberTable .nameColumn { width: 10%; }
 .memberTable .emailColumn { width: 30%; }
-.memberTable .blacklistColumn { width: 20%; }
-.memberTable .actionColumn { width: 20%; }
+.memberTable .blacklistColumn { width: 15%; }
+.memberTable .actionColumn { width: 15%; }
 
 .button,
 .buttonPrimary,

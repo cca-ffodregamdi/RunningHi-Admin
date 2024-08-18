@@ -266,6 +266,7 @@ const FeedbackAndFaq: React.FC = () => {
                                                         onChange={e => handleReplyChange(feedback.feedbackNo, e.target.value)}
                                                         placeholder="답변 입력"
                                                         className={feedbackStyles.replyTextarea}
+                                                        cols={25}
                                                     />
                                                 ) : (
                                                     feedback.hasReply ? (
@@ -276,34 +277,41 @@ const FeedbackAndFaq: React.FC = () => {
                                                             onChange={e => handleReplyChange(feedback.feedbackNo, e.target.value)}
                                                             placeholder="답변 입력"
                                                             className={feedbackStyles.replyTextarea}
+                                                            cols={25}
+                                                            rows={5}
                                                         />
                                                     )
                                                 )}
                                             </td>
                                             <td className={feedbackStyles.actionColumn}>
                                                 {!feedback.hasReply && (
+                                                    <div className={feedbackStyles.buttonContainer}>
                                                     <button
                                                         onClick={() => toggleEditReply(feedback.feedbackNo)}
                                                         className={feedbackStyles.saveButton}
                                                     >
                                                         제출
                                                     </button>
+                                                    </div>
                                                 )}
                                                 {editReply[feedback.feedbackNo] && (
-                                                    <button
+                                                    <div className={feedbackStyles.buttonContainer}>                                                    <button
                                                         onClick={() => submitReply(feedback.feedbackNo)}
                                                         className={feedbackStyles.saveButton}
                                                     >
                                                         제출
                                                     </button>
+                                                    </div>
                                                 )}
                                                 {feedback.hasReply && !editReply[feedback.feedbackNo] && (
+                                                    <div className={feedbackStyles.buttonContainer}>
                                                     <button
                                                         onClick={() => toggleEditReply(feedback.feedbackNo)}
                                                         className={feedbackStyles.editButton}
                                                     >
                                                         수정
                                                     </button>
+                                                    </div>
                                                 )}
                                             </td>
                                         </tr>

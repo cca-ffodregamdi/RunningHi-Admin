@@ -1,8 +1,131 @@
-.container {
-  display: flex;
+.replyTextarea {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  resize: vertical;
 }
 
-.main {
+.submitButton {
+  background-color: #2265C9;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.submitButton:hover {
+  background-color: #1a4fa0;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.pageButton {
+  background-color: #2265C9;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  margin: 0 5px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.pageButton:hover {
+  background-color: #1a4fa0;
+}
+
+.pageButton:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.pageInfo {
+  margin: 0 10px;
+  font-weight: bold;
+  color: #2265C9;
+}
+
+.pageContainer {
+  display: flex;
+  min-height: 100vh;
+  background-color: white;
+}
+
+.contentWrapper {
   flex-grow: 1;
   padding: 20px;
+  margin-left: 120px; /* 사이드바 너비에 맞춰 조정 */
+}
+
+.mainContent {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  border: 1px solid #e0e0e0;
+  padding: 20px;
+}
+
+.title {
+  color: #2265C9;
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+/* 페이지 내부 상단바 탭 */
+.tabContainer {
+  display: flex;
+  justify-content: left;
+  margin-bottom: 30px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.tabButton {
+  padding: 12px 24px;
+  font-size: 16px;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #666;
+  font-weight: 500;
+  position: relative;
+  margin: 0 5px;
+}
+
+.tabButton::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background-color: #2265C9;
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.tabButton:hover {
+  color: #2265C9;
+  font-weight: 600;
+}
+
+.tabButton:hover::after {
+  transform: scaleX(1);
+}
+
+.activeTab {
+  color: #2265C9;
+  font-weight: 600;
+}
+
+.activeTab::after {
+  transform: scaleX(1);
 }

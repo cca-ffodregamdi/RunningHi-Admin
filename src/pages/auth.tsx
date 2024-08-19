@@ -7,7 +7,7 @@ import SHA256 from 'crypto-js/sha256';
 const Auth: React.FC = () => {
     const [activeTab, setActiveTab] = useState<'login' | 'signup'>('login');
     const [loginData, setLoginData] = useState({ account: '', password: '' });
-    const [signupData, setSignupData] = useState({ account: '', password: '', inviteCode: '' });
+    const [signupData, setSignupData] = useState({ account: '', password: '', invitationCode: '' });
     const [error, setError] = useState<string | null>(null);
     const router = useRouter();
 
@@ -134,8 +134,8 @@ const Auth: React.FC = () => {
                     />
                     <input
                         type="text"
-                        name="inviteCode"
-                        value={signupData.inviteCode}
+                        name="invitationCode"
+                        value={signupData.invitationCode}
                         onChange={handleSignupChange}
                         placeholder="초대 코드"
                         required

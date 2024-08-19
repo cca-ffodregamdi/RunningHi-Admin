@@ -1,0 +1,144 @@
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modalContent {
+    background-color: white;
+    padding: 30px;
+    border-radius: 10px;
+    width: 90%;
+    height: 90vh;
+    max-width: none;
+    display: flex;
+    flex-direction: row;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.modalLeft {
+    width: 40%;
+    padding-right: 20px;
+    overflow-y: auto;
+}
+
+.modalRight {
+    width: 60%;
+    padding-left: 20px;
+    border-left: 1px solid #ccc;
+    display: flex;
+    flex-direction: column;
+}
+
+.tableContainer {
+    height: calc(100% - 50px); 
+    overflow-y: auto;
+    margin-bottom: 20px; 
+}
+
+.inputContainer {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.inputWrapper {
+    width: 48%;
+}
+
+.inputWrapper label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    font-size: 0.75em;
+}
+
+.inputWrapper input {
+    width: 100%;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.75em;
+}
+
+.contentWrapper {
+    margin-bottom: 20px;
+    font-size: 0.75em;
+}
+
+.contentWrapper strong {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.contentWrapper p {
+    background-color: #f0f0f0;
+    padding: 10px;
+    border-radius: 4px;
+}
+
+.imageWrapper {
+    margin-top: 20px;
+}
+
+.reportImage {
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
+}
+
+.reportTable {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.reportTable th, .reportTable td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+    font-size: 0.75em;
+}
+
+.reportTable th {
+    position: sticky;
+    top: 0;
+    background-color: #f2f2f2;
+    z-index: 10;
+}
+
+.reportTable tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.reportTable tbody tr:hover {
+    background-color: #f5f5f5;
+}
+
+.buttonContainer {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 10px;
+}
+
+.closeButton {
+    padding: 12px 24px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+    margin-left: 10px;
+}
+
+.closeButton:hover {
+    background-color: #0056b3;
+}

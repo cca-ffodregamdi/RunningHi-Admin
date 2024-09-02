@@ -10,7 +10,9 @@ export async function fetchWithToken(url: string, options: RequestInit = {}): Pr
         console.log(accessToken)
     }
 
+  if (!(options.body instanceof FormData)) {
     headers.set('Content-Type', 'application/json');
+  }
 
     const fetchOptions: RequestInit = {
         ...options,

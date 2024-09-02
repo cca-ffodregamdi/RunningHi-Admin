@@ -20,17 +20,6 @@ interface ChallengeData {
   challengeCount: number;
 }
 
-interface CreateChallengeRequest {
-  title: string;
-  content: string;
-  challengeCategory: 'DISTANCE' | 'SPEED' | 'ATTENDANCE';
-  image: File;
-  goal: number;
-  goalDetail: string;
-  startDate: string;
-  endDate: string;
-}
-
 interface GetChallengeResponse {
   challengeNo: number;
   title: string;
@@ -78,7 +67,7 @@ const Challenge: React.FC = () => {
         console.log('Invalid response data structure');
       }
     } catch (error) {
-      console.error('challenge 가져오기 에러:', error);
+      console.error('challenge 가져오기 실패:', error);
     }
   }, []);
 
@@ -112,7 +101,9 @@ const Challenge: React.FC = () => {
         },
       });
 
-      if (!response.ok) {
+      if (response.ok) {
+        alert('챌린지가 저장되었습니다.')
+      } else {
         throw new Error('챌린지 저장에 실패했습니다.');
       }
 
@@ -152,40 +143,44 @@ const Challenge: React.FC = () => {
             </button>
           </div>
           <div>
-            <table className={challengeStyles.challengeTable}>
-              <thead>
-                <tr>
-                  <th className={challengeStyles.numberColumn}>번호</th>
-                  <th className={challengeStyles.titleColumn}>제목</th>
-                  <th className={challengeStyles.categoryColumn}>카테고리</th>
-                  <th className={challengeStyles.dateColumn}>시작</th>
-                  <th className={challengeStyles.dateColumn}>종료</th>
-                  <th className={challengeStyles.statusColumn}>상태</th>
-                </tr>
-              </thead>
-              <tbody>
-                {challenges.length > 0 ? (
-                  challenges.map(challenge => (
-                    <tr key={challenge.challengeNo} onClick={() => handleChallengeClick(challenge)} className={challengeStyles.clickableRow}>
-                      <td className={challengeStyles.numberColumn}>{challenge.challengeNo}</td>
-                      <td className={challengeStyles.titleColumn}>{challenge.title}</td>
-                      <td className={challengeStyles.categoryColumn}>{challenge.category}</td>
-                      <td className={challengeStyles.dateColumn}>{new Date(challenge.startDate).toLocaleDateString()}</td>
-                      <td className={challengeStyles.dateColumn}>{new Date(challenge.endDate).toLocaleDateString()}</td>
-                      <td className={challengeStyles.statusColumn}>{getChallengeStatus(challenge.status)}</td>
-                    </tr>
-                  ))
-                ) : (
+            <div className={challengeStyles.tableContainer}>
+              <table className={challengeStyles.challengeTable}>
+                <thead>
                   <tr>
-                    <td colSpan={6}>챌린지가 없습니다.</td>
+                    <th className={challengeStyles.numberColumn}>번호</th>
+                    <th className={challengeStyles.titleColumn}>제목</th>
+                    <th className={challengeStyles.categoryColumn}>카테고리</th>
+                    <th className={challengeStyles.dateColumn}>시작일</th>
+                    <th className={challengeStyles.dateColumn}>종료일</th>
+                    <th className={challengeStyles.statusColumn}>상태</th>
                   </tr>
-                )}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {challenges.length > 0 ? (
+                    challenges.map(challenge => (
+                      <tr key={challenge.challengeNo} onClick={() => handleChallengeClick(challenge)} className={challengeStyles.clickableRow}>
+                        <td className={challengeStyles.numberColumn}>{challenge.challengeNo}</td>
+                        <td className={challengeStyles.titleColumn}>{challenge.title}</td>
+                        <td className={challengeStyles.categoryColumn}>{challenge.category}</td>
+                        <td className={challengeStyles.dateColumn}>{new Date(challenge.startDate).toLocaleDateString()}</td>
+                        <td className={challengeStyles.dateColumn}>{new Date(challenge.endDate).toLocaleDateString()}</td>
+                        <td className={challengeStyles.statusColumn}>{getChallengeStatus(challenge.status)}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={6}>챌린지가 없습니다.</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
-          <button className={challengeStyles.addButton} onClick={handleAddChallenge}>
-            챌린지 추가
-          </button>
+          <div className={challengeStyles.addButtonContainer}>
+            <button className={challengeStyles.addButton} onClick={handleAddChallenge}>
+              챌린지 추가
+            </button>
+          </div>
         </div>
       </div>
       {isAddModalOpen && (

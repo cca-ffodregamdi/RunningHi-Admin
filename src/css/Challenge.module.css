@@ -201,14 +201,32 @@
     border-bottom: none;
 }
 
-.challengeTable .numberColumn { width: 3%; }
-.challengeTable .titleColumn { width: 15%; }
-.challengeTable .categoryColumn { width: 10%; }
-.challengeTable .dateColumn { width: 12%; }
-.challengeTable .statusColumn { width: 10%; }
-.challengeTable .actionColumn { width: 6%; }
+.challengeTable .numberColumn {
+    width: 3%;
+}
 
-.inputField, .textareaField {
+.challengeTable .titleColumn {
+    width: 15%;
+}
+
+.challengeTable .categoryColumn {
+    width: 10%;
+}
+
+.challengeTable .dateColumn {
+    width: 12%;
+}
+
+.challengeTable .statusColumn {
+    width: 10%;
+}
+
+.challengeTable .actionColumn {
+    width: 6%;
+}
+
+.inputField,
+.textareaField {
     width: 100%;
     padding: 10px;
     margin-bottom: 10px;
@@ -218,7 +236,8 @@
     transition: border-color 0.3s ease;
 }
 
-.inputField:focus, .textareaField:focus {
+.inputField:focus,
+.textareaField:focus {
     border-color: #2265C9;
     outline: none;
 }
@@ -228,7 +247,10 @@
     resize: vertical;
 }
 
-.editButton, .deleteButton, .saveButton, .addButton {
+.editButton,
+.deleteButton,
+.saveButton,
+.addButton {
     padding: 4px 12px;
     border: none;
     border-radius: 4px;
@@ -259,7 +281,10 @@
     font-size: 16px;
 }
 
-.editButton:hover, .deleteButton:hover, .saveButton:hover, .addButton:hover {
+.editButton:hover,
+.deleteButton:hover,
+.saveButton:hover,
+.addButton:hover {
     opacity: 0.9;
 }
 
@@ -308,4 +333,15 @@
 .clickableRow {
     cursor: pointer;
     transition: background-color 0.3s;
-  }
+}
+
+.tableContainer {
+    margin-bottom: 20px;
+}
+
+.addButtonContainer {
+    display: flex;
+    justify-content: flex-end;
+    /* 버튼을 오른쪽으로 정렬 */
+    margin-top: 20px;
+}

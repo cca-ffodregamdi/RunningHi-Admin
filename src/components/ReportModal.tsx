@@ -34,6 +34,8 @@ interface ReplyReport {
     replyContent: string;
 }
 
+type ReportList = PostReportList[] | ReplyReportList[];
+
 interface PostReportList {
     postReportNo: number;
     category: string;
@@ -56,9 +58,8 @@ interface ReplyReportList {
 
 const ReportModal: React.FC<ReportDetailModalProps> = ({ report, isPostReport, onClose }) => {
     const [detailedReport, setDetailedReport] = useState<PostReport | ReplyReport | null>(null);
-    const [reportList, setReportList] = useState<PostReportList[] | ReplyReportList[]>([]);
+    const [reportList, setReportList] = useState<ReportList>([]);
     const [selectedRows, setSelectedRows] = useState<number[]>([]);
-
 
     const fetchDetailedReport = async () => {
         try {
@@ -81,7 +82,7 @@ const ReportModal: React.FC<ReportDetailModalProps> = ({ report, isPostReport, o
                 : `/api/v1/reply-reports/reply?replyNo=${report.reportedReplyNo}`;
     
             const response = await appClient(url, { method: 'GET' });
-            const data: ApiResult<PostReportList[] | ReplyReportList[]> = await response.json();
+            const data: ApiResult<ReportList> = await response.json();
             setReportList(data.data);
         } catch (error) {
             console.error('상세 정보 가져오기 에러:', error);
@@ -103,6 +104,22 @@ const ReportModal: React.FC<ReportDetailModalProps> = ({ report, isPostReport, o
         );
     };
 
+    const isPostReportType = (report: PostReport | ReplyReport): report is PostReport => {
+        return 'postReportNo' in report;
+    };
+
+    const getReportNo = (report: PostReport | ReplyReport): number => {
+        return isPostReportType(report) ? report.postReportNo : report.replyReportNo;
+    };
+
+    const getReportedItemNo = (report: PostReport | ReplyReport): number => {
+        return isPostReportType(report) ? report.reportedPostNo : report.reportedReplyNo;
+    };
+
+    const getReportedContent = (report: PostReport | ReplyReport): string => {
+        return isPostReportType(report) ? report.postContent : report.replyContent;
+    };
+
     return (
         <div className={styles.modalOverlay}>
             <div className={styles.modalContent}>
@@ -114,7 +131,7 @@ const ReportModal: React.FC<ReportDetailModalProps> = ({ report, isPostReport, o
                             <label>신고 번호:</label>
                             <input
                                 type="number"
-                                value={isPostReport ? detailedReport.postReportNo : detailedReport.replyReportNo}
+                                value={getReportNo(detailedReport)}
                                 readOnly
                             />
                         </div>
@@ -123,7 +140,7 @@ const ReportModal: React.FC<ReportDetailModalProps> = ({ report, isPostReport, o
                             <label>{isPostReport ? '게시글' : '댓글'} 번호:</label>
                             <input
                                 type="number"
-                                value={isPostReport ? detailedReport.reportedPostNo : detailedReport.reportedReplyNo}
+                                value={getReportedItemNo(detailedReport)}
                                 readOnly
                             />
                         </div>
@@ -131,12 +148,12 @@ const ReportModal: React.FC<ReportDetailModalProps> = ({ report, isPostReport, o
                     
                     <div className={styles.contentWrapper}>
                         <strong>{isPostReport ? '게시글' : '댓글'} 내용:</strong> 
-                        <p>{isPostReport ? (detailedReport as PostReport).postContent : (detailedReport as ReplyReport).replyContent}</p>
+                        <p>{getReportedContent(detailedReport)}</p>
                     </div>
                     
-                    {isPostReport && (detailedReport as PostReport).imageUrl && (
+                    {isPostReportType(detailedReport) && detailedReport.imageUrl && (
                         <div className={styles.imageWrapper}>
-                            <img src={(detailedReport as PostReport).imageUrl} alt="신고된 게시글 이미지" className={styles.reportImage} />
+                            <img src={detailedReport.imageUrl} alt="신고된 게시글 이미지" className={styles.reportImage} />
                         </div>
                     )}
                 </div>
@@ -155,15 +172,15 @@ const ReportModal: React.FC<ReportDetailModalProps> = ({ report, isPostReport, o
                             </thead>
                             <tbody>
                                 {reportList.map((row) => (
-                                    <tr key={isPostReport ? row.postReportNo : row.replyReportNo}>
+                                    <tr key={isPostReport ? (row as PostReportList).postReportNo : (row as ReplyReportList).replyReportNo}>
                                         <td>
                                             <input 
                                                 type="checkbox" 
-                                                checked={selectedRows.includes(isPostReport ? row.postReportNo : row.replyReportNo)}
-                                                onChange={() => handleRowSelect(isPostReport ? row.postReportNo : row.replyReportNo)}
+                                                checked={selectedRows.includes(isPostReport ? (row as PostReportList).postReportNo : (row as ReplyReportList).replyReportNo)}
+                                                onChange={() => handleRowSelect(isPostReport ? (row as PostReportList).postReportNo : (row as ReplyReportList).replyReportNo)}
                                             />
                                         </td>
-                                        <td>{isPostReport ? row.postReportNo : row.replyReportNo}</td>
+                                        <td>{isPostReport ? (row as PostReportList).postReportNo : (row as ReplyReportList).replyReportNo}</td>
                                         <td>{row.category}</td>
                                         <td>{row.content}</td>
                                         <td>{row.status}</td>
